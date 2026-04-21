@@ -7,7 +7,7 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="flex items-start w-full h-17 px-2 pb-2 border-b border-neutral-300 ">
+      <div className="fixed z-50 bg-white flex items-start w-full h-17 px-2 pb-2 border-b border-neutral-300 ">
         <div className="flex w-full gap-4 items-center">
           <button className="mt-3">
             <PanelLeft size={20} />
