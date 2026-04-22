@@ -14,6 +14,7 @@ export const userLogin = async (req, res) => {
       return res.status(400).json("User not Found");
     }
 
+    console.log(user.rows[0].password);
     const validPassword = await bcrypt.compare(password, user.rows[0].password);
 
     if (!validPassword) {
@@ -29,6 +30,7 @@ export const userLogin = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
     res.json({
+      success:true,
       message: "Login Successful",
       user: {
         id: user.id,

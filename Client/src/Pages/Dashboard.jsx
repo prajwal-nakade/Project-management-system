@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { AlertTriangle, CheckCircle, FolderOpen, Users } from "lucide-react";
 import ProjectOverview from "./ProjectOverview";
 import Mytask from "./Mytask";
 import OverdueDisplay from "./OverdueDisplay";
 import RecentActivity from "./RecentActivity";
+
 const Dashboard = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [status, setStatus] = useState("");
+
   return (
     <>
       <Layout>
@@ -19,7 +23,12 @@ const Dashboard = () => {
             </div>
 
             <div className="m-3">
-              <button className="border bg-indigo-800 text-white px-3 py-2 rounded-md">
+              <button
+                className="border bg-indigo-800 text-white px-3 py-2 rounded-md"
+                onClick={() => {
+                  setIsModalOpen(true);
+                }}
+              >
                 + New Project
               </button>
             </div>
@@ -80,6 +89,90 @@ const Dashboard = () => {
               <OverdueDisplay />
             </div>
           </div>
+
+          {isModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/70">
+              <div className="bg-white p-6 rounded-md w-100 relative">
+                <button
+                  className="absolute top-2 right-3 text-2xl"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                  }}
+                >
+                  X
+                </button>
+
+                <h1 className="flex items-center justify-center text-2xl font-bold mb-3">Create New Project</h1>
+                <form action="" className="w-full flex flex-col justify-center mx-auto my-auto">
+                  <label htmlFor="">Project Name :</label>
+                  <input
+                    type="text"
+                    placeholder="Enter the Project name here"
+                    className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                  />
+
+                  <label htmlFor="">Description :</label>
+                  <textarea name="description" id="" className="border border-neutral-400 rounded-md px-3 py-1 m-1 ">
+                    Describe Your Project
+                  </textarea>
+
+                  <div className="w-ful flex gap-11 mb-4">
+                    <div className="  ">
+                      <label htmlFor="" className="flex items-center">Status :</label>
+                      <select
+                        name=""
+                        id=""
+                        value={status}
+                        onChange={(e) => {
+                          setStatus(e.target.value);
+                        }}
+                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                      >
+                        <option value="">select Status</option>
+                        <option value="todo">To Do</option>
+                        <option value="inprogress">In Progress</option>
+                        <option value="done">Done</option>
+                      </select>
+                    </div>
+
+                    <div className=" ">
+                      <label htmlFor="" className="flex items-center">Prioroty :</label>
+                      <select
+                        name=""
+                        id=""
+                        value={status}
+                        onChange={(e) => {
+                          setStatus(e.target.value);
+                        }}
+                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                      >
+                        <option value="">Priority</option>
+                        <option value="todo">High</option>
+                        <option value="inprogress">Medium</option>
+                        <option value="done">Low</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="w-ful flex justify-between">
+                    <div>
+                      <label htmlFor="">Start Date :</label>
+                      <input type="date" className="border border-neutral-400 rounded-md px-3 py-1 m-1"/>
+                    </div>
+
+                    <div>
+                      <label htmlFor="">End Date :</label>
+                      <input type="date" className="border border-neutral-400 rounded-md px-3 py-1 m-1"/>
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <button className="w-30 flex justify-center my-4 border mx-auto rounded-md bg-blue-700 text-white  hover:bg-blue-400 ">Save</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </Layout>
     </>

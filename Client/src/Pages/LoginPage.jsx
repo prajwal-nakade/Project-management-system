@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
+import { login } from "../API/endpoint";
 
 const LoginPage = () => {
   const Navigate = useNavigate();
@@ -8,15 +9,32 @@ const LoginPage = () => {
     email: "",
     password: "",
   });
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    Navigate("/Dashboard");
-  };
 
   const handleChage = (e) => {
     const { name, value } = e.target;
 
     setLoginData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const payload = {
+        email: loginData.email,
+        password: loginData.password,
+      };
+
+      const data = await login(payload);
+
+      if (data && data.success) {
+        alert("Entry Successful");
+        Navigate("/dashboard");
+      } 
+    } catch (error) {
+      console.log(error);
+      alert(error.response?.data?.message || "An error occurred during Login");
+    }
   };
 
   return (

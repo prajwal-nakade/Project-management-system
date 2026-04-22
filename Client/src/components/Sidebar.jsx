@@ -12,7 +12,11 @@ import ProjectsSidebar from "./ProjectsSidebar";
 
 const Sidebar = () => {
   const menuItems = [
-    { name: "Dashboard", href: "/", icon: <LayoutDashboardIcon size={18} /> },
+    {
+      name: "Dashboard",
+      href: "/Dashboard",
+      icon: <LayoutDashboardIcon size={18} />,
+    },
     { name: "Projects", href: "/projects", icon: <FolderOpenIcon size={18} /> },
     { name: "Team", href: "/Team", icon: <UserIcon size={18} /> },
     { name: "Settings", href: "/settings", icon: <SettingsIcon size={18} /> },
@@ -59,8 +63,10 @@ const Sidebar = () => {
                     >
                       <span>{ws.name}</span>
                       {selected === ws.name && <span>✔</span>}
+
                     </div>
                   ))}
+                  <button className="w-full text-blue-500 border-t p-3 border-neutral-300">+ Add New Workspace</button>
                 </div>
               )}
             </div>
