@@ -1,40 +1,94 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Layout from "../components/Layout";
-import { ChevronDown, Key, SearchIcon } from "lucide-react";
+import { ChevronDown, SearchIcon } from "lucide-react";
 
 const Projects = () => {
-  const [open, setOpen] = useState();
-  const [isOpen, setIsOpen] = useState();
-  const [isSelected, setIsSelected] = useState("All Status");
-  const [selected, setSelected] = useState("Priority");
+  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [ isModalOpen , setIsModalOpen] = useState(false);
+  const [isSelected, setIsSelected] = useState("All Status");
+  const [selected, setSelected] = useState("All Priority");
+
+  const [projects, setProjects] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [newProject, setNewProject] = useState({
+    projectname: "",
+    projectdesc: "",
+    status: "",
+    priority: "",
+    startdate: "",
+    enddate: "",
+  });
+
+  // FETCH PROJECTS
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/projects", {
+        withCredentials: true,
+      });
+
+      setProjects(res.data.projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  // HANDLE INPUT CHANGE
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setNewProject((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // CREATE PROJECT
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/new-project",
+        newProject,
+        {
+          withCredentials: true,
+        },
+      );
+
+      console.log(res.data);
+
+      // REFRESH PROJECTS
+      fetchProjects();
+
+      // CLOSE MODAL
+      setIsModalOpen(false);
+
+      // RESET FORM
+      setNewProject({
+        projectname: "",
+        projectdesc: "",
+        status: "",
+        priority: "",
+        startdate: "",
+        enddate: "",
+      });
+    } catch (error) {
+      console.error("Project creation failed:", error);
+    }
+  };
 
   const Status = [
-    {
-      name: "All Status",
-      id: 1,
-    },
-    {
-      name: "Active",
-      id: 2,
-    },
-    {
-      name: "Planning",
-      id: 2,
-    },
-    {
-      name: "Completed",
-      id: 3,
-    },
-    {
-      name: "On Hold",
-      id: 4,
-    },
-    {
-      name: "Cancelled",
-      id: 5,
-    },
+    { name: "All Status", id: 1 },
+    { name: "Active", id: 2 },
+    { name: "Planning", id: 3 },
+    { name: "Completed", id: 4 },
   ];
 
   const Priority = [
@@ -44,177 +98,221 @@ const Projects = () => {
     { name: "Low", id: 4 },
   ];
 
+  // FILTER PROJECTS
+  const filteredProjects = projects.filter((project) => {
+    const statusMatch =
+      isSelected === "All Status"
+        ? true
+        : project.status.toLowerCase() === isSelected.toLowerCase();
+
+    const priorityMatch =
+      selected === "All Priority"
+        ? true
+        : project.priority.toLowerCase() === selected.toLowerCase();
+
+    return statusMatch && priorityMatch;
+  });
+
   return (
     <>
       <Layout>
         <div className="max-w-6xl flex flex-col mx-auto my-auto">
-          <div className="flex justify-between items-center mx-5 my-5 ">
+          {/* HEADER */}
+          <div className="flex justify-between items-center mx-5 my-5">
             <div>
               <h1 className="font-bold text-2xl">Projects</h1>
               <p>Manage And Track Your Projects</p>
             </div>
-            <button className="bg-blue-500 px-3 py-1 rounded-md text-white  " 
-            onClick={(e) => {setIsModalOpen(true)}}>
+
+            <button
+              className="bg-blue-500 px-3 py-2 rounded-md text-white hover:bg-blue-600 transition"
+              onClick={() => {
+                setIsModalOpen(true);
+              }}
+            >
               + New Project
             </button>
           </div>
 
-          <div className="flex items-start mt-3 mx-5 my-5 gap-5">
-            <div className="relative flex items-center  ">
+          {/* FILTERS */}
+          <div className="flex items-start mt-3 mx-5 my-5 gap-5 flex-wrap">
+            {/* SEARCH */}
+            <div className="relative flex items-center">
               <SearchIcon
                 size={20}
                 className="absolute left-2.5 text-gray-500"
               />
+
               <input
                 type="text"
-                placeholder="Search Projects,tasks here"
-                className="rounded-md border border-gray-300 text-gray-900 pl-8 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus-border-blue-500 transition"
+                placeholder="Search Projects, tasks here"
+                className="rounded-md border border-gray-300 text-gray-900 pl-8 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
               />
             </div>
 
-            <div className="">
-              <div className="border w-40 px-2 py-2 rounded-md border-neutral-300 cursor-pointer ">
+            {/* STATUS FILTER */}
+            <div>
+              <div className="border w-40 px-2 py-2 rounded-md border-neutral-300 cursor-pointer relative">
                 <button
                   onClick={() => setOpen(!open)}
-                  className="flex cursor-pointer justify-center items-center mx-auto "
+                  className="flex justify-center items-center mx-auto"
                 >
                   {isSelected} <ChevronDown />
                 </button>
+
                 {open && (
-                  <div className="flex flex-col justify-center items-center mx-auto border-t border-neutral-300">
-                    {Status.map((e) => {
-                      return (
-                        <div
-                          key={e.name}
-                          onClick={() => {
-                            setOpen(!open);
-                            setIsSelected(e.name);
-                          }}
-                        >
-                          <span>{e.name}</span>
-                          {isSelected === e.name}
-                        </div>
-                      );
-                    })}
+                  <div className="absolute bg-white border w-full left-0 top-12 rounded-md shadow-md z-10">
+                    {Status.map((e) => (
+                      <div
+                        key={e.id}
+                        className="p-2 hover:bg-gray-100"
+                        onClick={() => {
+                          setOpen(false);
+                          setIsSelected(e.name);
+                        }}
+                      >
+                        {e.name}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="">
-              <div className="border w-40 px-2 py-2 rounded-md border-neutral-300 cursor-pointer ">
+            {/* PRIORITY FILTER */}
+            <div>
+              <div className="border w-40 px-2 py-2 rounded-md border-neutral-300 cursor-pointer relative">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="flex cursor-pointer justify-center items-center mx-auto "
+                  className="flex justify-center items-center mx-auto"
                 >
                   {selected} <ChevronDown />
                 </button>
+
                 {isOpen && (
-                  <div className="flex flex-col justify-center items-center mx-auto border-t border-neutral-300">
-                    {Priority.map((s) => {
-                      return (
-                        <div
-                          key={s.name}
-                          onClick={() => {
-                            setIsOpen(!isOpen);
-                            setSelected(s.name);
-                          }}
-                        >
-                          <span>{s.name}</span>
-                          {selected === s.name}
-                        </div>
-                      );
-                    })}
+                  <div className="absolute bg-white border w-full left-0 top-12 rounded-md shadow-md z-10">
+                    {Priority.map((s) => (
+                      <div
+                        key={s.id}
+                        className="p-2 hover:bg-gray-100"
+                        onClick={() => {
+                          setIsOpen(false);
+                          setSelected(s.name);
+                        }}
+                      >
+                        {s.name}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="flex">
-            <div className="w-80 p-3 mx-5 cursor-pointer hover:bg-gray-100 border border-neutral-300 rounded-md ">
-              <div className="flex justify-between">
-                <h1>Kubernetes Migration</h1>
-              </div>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro,
-                ipsam!
-              </p>
+          {/* PROJECTS */}
+          <div className="flex flex-wrap gap-5 mx-5">
+            {filteredProjects.length === 0 ? (
+              <div className="text-gray-500">No Projects Found</div>
+            ) : (
+              filteredProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="w-80 p-4 cursor-pointer hover:bg-gray-100 border border-neutral-300 rounded-md transition"
+                >
+                  <div className="flex justify-between items-center">
+                    <h1 className="font-semibold text-lg capitalize">
+                      {project.projectname}
+                    </h1>
+                  </div>
 
-              <div className="flex justify-between text-sm text-neutral-600 py-3">
-                <span className="text-green-950 bg-green-300 text-sm px-2 py-1 rounded-md ">
-                  Active
-                </span>
-                <span>High Priority</span>
-              </div>
-            </div>
+                  <p className="text-neutral-600 mt-2">{project.projectdesc}</p>
 
-            <div className="w-80 p-3 mx-5 cursor-pointer hover:bg-gray-100 border border-neutral-300 rounded-md ">
-              <div className="flex justify-between">
-                <h1>Kubernetes Migration</h1>
-              </div>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro,
-                ipsam!
-              </p>
+                  <div className="flex justify-between text-sm text-neutral-600 py-3">
+                    <span
+                      className={`px-2 py-1 rounded-md capitalize
+                        ${
+                          project.status === "active"
+                            ? "bg-green-300 text-green-950"
+                            : project.status === "planning"
+                              ? "bg-yellow-300 text-yellow-950"
+                              : project.status === "completed"
+                                ? "bg-blue-300 text-blue-950"
+                                : "bg-gray-300 text-gray-900"
+                        }
+                      `}
+                    >
+                      {project.status}
+                    </span>
 
-              <div className="flex justify-between text-sm text-neutral-600 py-3">
-                <span className="text-green-950 bg-green-300 text-sm px-2 py-1 rounded-md ">
-                  Active
-                </span>
-                <span>Medium Priority</span>
-              </div>
-            </div>
+                    <span className="capitalize">
+                      {project.priority} Priority
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-sm text-gray-500 border-t pt-3">
+                    <span>
+                      Start: {new Date(project.startdate).toLocaleDateString()}
+                    </span>
+
+                    <span>
+                      End: {new Date(project.enddate).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
+          {/* MODAL */}
           {isModalOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/70">
-              <div className="bg-white p-6 rounded-md w-100 relative">
+            <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+              <div className="bg-white p-6 rounded-md w-[450px] relative">
                 <button
                   className="absolute top-2 right-3 text-2xl"
                   onClick={() => {
                     setIsModalOpen(false);
                   }}
                 >
-                  X
+                  ×
                 </button>
 
-                <h1 className="flex items-center justify-center text-2xl font-bold mb-3">
+                <h1 className="flex items-center justify-center text-2xl font-bold mb-5">
                   Create New Project
                 </h1>
-                <form
-                  action=""
-                  className="w-full flex flex-col justify-center mx-auto my-auto"
-                >
-                  <label htmlFor="">Project Name :</label>
+
+                <form onSubmit={handleSubmit} className="w-full flex flex-col">
+                  <label>Project Name :</label>
+
                   <input
                     type="text"
-                    placeholder="Enter the Project name here"
-                    className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                    name="projectname"
+                    placeholder="Enter project name"
+                    value={newProject.projectname}
+                    onChange={handleChange}
+                    className="border border-neutral-400 rounded-md px-3 py-2 m-1"
+                    required
                   />
 
-                  <label htmlFor="">Description :</label>
-                  <textarea
-                    name="description"
-                    id=""
-                    className="border border-neutral-400 rounded-md px-3 py-1 m-1 "
-                  >
-                    Describe Your Project
-                  </textarea>
+                  <label>Description :</label>
 
-                  <div className="w-ful flex gap-11 mb-4">
-                    <div className="  ">
-                      <label htmlFor="" className="flex items-center">
-                        Status :
-                      </label>
+                  <textarea
+                    name="projectdesc"
+                    value={newProject.projectdesc}
+                    onChange={handleChange}
+                    className="border border-neutral-400 rounded-md px-3 py-2 m-1"
+                    required
+                  />
+
+                  <div className="w-full flex gap-5 mb-4">
+                    <div className="flex-1">
+                      <label>Status :</label>
+
                       <select
-                        name=""
-                        id=""
-                        value={status}
-                        onChange={(e) => {
-                          setStatus(e.target.value);
-                        }}
-                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                        name="status"
+                        value={newProject.status}
+                        onChange={handleChange}
+                        className="border border-neutral-400 rounded-md px-3 py-2 m-1 w-full"
+                        required
                       >
                         <option value="">select Status</option>
                         <option value="todo">To Do</option>
@@ -223,50 +321,58 @@ const Projects = () => {
                       </select>
                     </div>
 
-                    <div className=" ">
-                      <label htmlFor="" className="flex items-center">
-                        Prioroty :
-                      </label>
+                    <div className="flex-1">
+                      <label>Priority :</label>
+
                       <select
-                        name=""
-                        id=""
-                        value={status}
-                        onChange={(e) => {
-                          setStatus(e.target.value);
-                        }}
-                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                        name="priority"
+                        value={newProject.priority}
+                        onChange={handleChange}
+                        className="border border-neutral-400 rounded-md px-3 py-2 m-1 w-full"
+                        required
                       >
-                        <option value="">Priority</option>
-                        <option value="todo">High</option>
-                        <option value="inprogress">Medium</option>
-                        <option value="done">Low</option>
+                        <option value="">Select Priority</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
                       </select>
                     </div>
                   </div>
 
-                  <div className="w-ful flex justify-between">
-                    <div>
-                      <label htmlFor="">Start Date :</label>
+                  <div className="w-full flex justify-between gap-4">
+                    <div className="flex flex-col w-full">
+                      <label>Start Date :</label>
+
                       <input
                         type="date"
-                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                        name="startdate"
+                        value={newProject.startdate}
+                        onChange={handleChange}
+                        className="border border-neutral-400 rounded-md px-3 py-2 m-1"
+                        required
                       />
                     </div>
 
-                    <div>
-                      <label htmlFor="">End Date :</label>
+                    <div className="flex flex-col w-full">
+                      <label>End Date :</label>
+
                       <input
                         type="date"
-                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                        name="enddate"
+                        value={newProject.enddate}
+                        onChange={handleChange}
+                        className="border border-neutral-400 rounded-md px-3 py-2 m-1"
+                        required
                       />
                     </div>
                   </div>
 
-                  <div className="w-full">
-                    <button className="w-30 flex justify-center my-4 border mx-auto rounded-md bg-blue-700 text-white  hover:bg-blue-400 ">
-                      Save
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    className="w-32 flex justify-center my-5 mx-auto rounded-md bg-blue-700 text-white py-2 hover:bg-blue-500 transition"
+                  >
+                    Save Project
+                  </button>
                 </form>
               </div>
             </div>

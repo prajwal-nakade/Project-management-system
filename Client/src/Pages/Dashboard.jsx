@@ -10,6 +10,42 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [status, setStatus] = useState("");
 
+  const [newProject, setNewProject] = useState({
+    projectname: "",
+    projectdesc: "",
+    status: "",
+    priority: "",
+    startdate: "",
+    enddate: "",
+  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:5000/new-project", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      console.log(data);
+      alert("Data submitted successfully");
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setNewProject((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
   return (
     <>
       <Layout>
@@ -102,30 +138,44 @@ const Dashboard = () => {
                   X
                 </button>
 
-                <h1 className="flex items-center justify-center text-2xl font-bold mb-3">Create New Project</h1>
-                <form action="" className="w-full flex flex-col justify-center mx-auto my-auto">
+                <h1 className="flex items-center justify-center text-2xl font-bold mb-3">
+                  Create New Project
+                </h1>
+                <form
+                  onSubmit={handleSubmit}
+                  action=""
+                  className="w-full flex flex-col justify-center mx-auto my-auto"
+                >
                   <label htmlFor="">Project Name :</label>
                   <input
+                    name="projectname"
+                    value={newProject.projectname}
+                    onChange={handleChange}
                     type="text"
                     placeholder="Enter the Project name here"
                     className="border border-neutral-400 rounded-md px-3 py-1 m-1"
                   />
 
                   <label htmlFor="">Description :</label>
-                  <textarea name="description" id="" className="border border-neutral-400 rounded-md px-3 py-1 m-1 ">
+                  <textarea
+                    name="projectdesc"
+                    value={newProject.projectdesc}
+                    onChange={handleChange}
+                    id=""
+                    className="border border-neutral-400 rounded-md px-3 py-1 m-1 "
+                  >
                     Describe Your Project
                   </textarea>
 
                   <div className="w-ful flex gap-11 mb-4">
                     <div className="  ">
-                      <label htmlFor="" className="flex items-center">Status :</label>
+                      <label htmlFor="" className="flex items-center">
+                        Status :
+                      </label>
                       <select
-                        name=""
-                        id=""
-                        value={status}
-                        onChange={(e) => {
-                          setStatus(e.target.value);
-                        }}
+                        name="status"
+                        value={newProject.status}
+                        onChange={handleChange}
                         className="border border-neutral-400 rounded-md px-3 py-1 m-1"
                       >
                         <option value="">select Status</option>
@@ -136,20 +186,20 @@ const Dashboard = () => {
                     </div>
 
                     <div className=" ">
-                      <label htmlFor="" className="flex items-center">Prioroty :</label>
+                      <label htmlFor="" className="flex items-center">
+                        Prioroty :
+                      </label>
                       <select
-                        name=""
+                        name="priority"
                         id=""
-                        value={status}
-                        onChange={(e) => {
-                          setStatus(e.target.value);
-                        }}
+                        value={newProject.priority}
+                        onChange={handleChange}
                         className="border border-neutral-400 rounded-md px-3 py-1 m-1"
                       >
                         <option value="">Priority</option>
-                        <option value="todo">High</option>
-                        <option value="inprogress">Medium</option>
-                        <option value="done">Low</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
                       </select>
                     </div>
                   </div>
@@ -157,17 +207,31 @@ const Dashboard = () => {
                   <div className="w-ful flex justify-between">
                     <div>
                       <label htmlFor="">Start Date :</label>
-                      <input type="date" className="border border-neutral-400 rounded-md px-3 py-1 m-1"/>
+                      <input
+                        name="startdate"
+                        value={newProject.startdate}
+                        onChange={handleChange}
+                        type="date"
+                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                      />
                     </div>
 
                     <div>
                       <label htmlFor="">End Date :</label>
-                      <input type="date" className="border border-neutral-400 rounded-md px-3 py-1 m-1"/>
+                      <input
+                        type="date"
+                        name="enddate"
+                        value={newProject.enddate}
+                        onChange={handleChange}
+                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                      />
                     </div>
                   </div>
 
                   <div className="w-full">
-                    <button className="w-30 flex justify-center my-4 border mx-auto rounded-md bg-blue-700 text-white  hover:bg-blue-400 ">Save</button>
+                    <button className="w-30 flex justify-center my-4 border mx-auto rounded-md bg-blue-700 text-white  hover:bg-blue-400 ">
+                      Save
+                    </button>
                   </div>
                 </form>
               </div>
