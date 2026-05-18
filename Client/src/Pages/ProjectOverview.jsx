@@ -5,13 +5,9 @@ import axios from "axios";
 const ProjectOverview = () => {
   const [projects, setProjects] = useState([]);
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/projects", {
+      const res = await axios.get("http://localhost:5000/projects/projects", {
         withCredentials: true,
       });
 
@@ -20,6 +16,14 @@ const ProjectOverview = () => {
       console.error("Error fetching projects:", error);
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+      await fetchProjects();
+    };
+
+    init();
+  }, []);
 
   return (
     <>

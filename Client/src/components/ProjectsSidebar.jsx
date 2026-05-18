@@ -6,86 +6,159 @@ import {
   CalendarIcon,
   SettingsIcon,
 } from "lucide-react";
-import React, { useState, useRef, useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ProjectsSidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOpenSub, setIsOpenSub] = useState(false);
-  const [isOpenSub2, setIsOpenSub2] = useState(false);
-  const [isSelected, setIsSelected] = useState();
-  const dropDownRef = useRef();
   const navigate = useNavigate();
 
-  const Projects = [
-    { name: "LaunchPad CRM", id: 1 },
-    { name: "Brand Identity Overhaul", id: 2 },
-  ];
+  const [projects, setProjects] = useState([]);
+  const [openProject, setOpenProject] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const subMenus = [
     {
-      name: "Task",
-      icon: <KanbanIcon size={18} />,
+      name: "Tasks",
+      icon: <KanbanIcon size={16} />,
+      path: "tasks",
     },
     {
       name: "Analytics",
-      icon: <ChartColumnIcon size={18} />,
+      icon: <ChartColumnIcon size={16} />,
+      path: "analytics",
     },
     {
-      name: "Calender",
-      icon: <CalendarIcon size={18} />,
+      name: "Calendar",
+      icon: <CalendarIcon size={16} />,
+      path: "calendar",
     },
     {
       name: "Settings",
-      icon: <SettingsIcon size={18} />,
+      icon: <SettingsIcon size={16} />,
+      path: "settings",
     },
   ];
 
+  // FETCH PROJECTS
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+
+      const response = await axios.get("http://localhost:5000/projects", {
+        withCredentials: true,
+      });
+
+      setProjects(response.data.projects || []);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropDownRef.current && !dropDownRef.current.contains(e.target)) {
-        setIsOpen(!isOpen);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    fetchProjects();
   }, []);
 
-  return (
-    <>
-      <div>
-        <div className="w-full flex flex-col px-5 my-8">
-          <h1 className="flex justify-between">
-            PROJECTS <ArrowRight size={18} />
-          </h1>
-          <div className="flex flex-col py-3 justify-between">
-            {Projects.map((e) => (
-              <div key={e.id}>
-                <button
-                  onClick={() => { e.id === 1 && setIsOpenSub(!isOpenSub) 
-                    e.id === 2 && setIsOpenSub2(!isOpenSub2)}}
-                >
-                  <span className="flex items-center gap-2">
-                    {e.name} <ChevronDown />
-                  </span>
-                </button>
+  // HANDLE SUBMENU NAVIGATION
+  const handleNavigation = (projectId, menu) => {
+    switch (menu.path) {
+      case "tasks":
+        navigate(`/tasks/${projectId}`);
+        break;
 
-                {((e.id === 1 && isOpenSub) || (e.id === 2 && isOpenSub2)) &&
-                  subMenus.map((sm, iid) => (
-                    <span
-                      key={iid}
-                      className="flex items-center gap-2 text-sm text-gray-600 px-3 py-2 hover:bg-neutral-300 rounded-md"
-                    >
-                      {sm.icon}
-                      {sm.name}
-                    </span>
-                  ))}
-              </div>
-            ))}
-          </div>
-        </div>
+      case "analytics":
+        navigate(`/projects/${projectId}/analytics`);
+        break;
+
+      case "calendar":
+        navigate(`/projects/${projectId}/calendar`);
+        break;
+
+      case "settings":
+        navigate(`/projects/${projectId}/settings`);
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  return (
+    <div className="w-full flex flex-col">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <h1 className="text-xs font-semibold tracking-wider text-neutral-500">
+          PROJECTS
+        </h1>
+
+        <ArrowRight size={16} className="text-neutral-500" />
       </div>
-    </>
+
+      {/* LOADING */}
+      {loading && (
+        <div className="text-sm text-neutral-500 px-2 py-2">
+          Loading projects...
+        </div>
+      )}
+
+      {/* EMPTY STATE */}
+      {!loading && projects.length === 0 && (
+        <div className="text-sm text-neutral-400 px-2 py-2">
+          No projects found
+        </div>
+      )}
+
+      {/* PROJECT LIST */}
+      <div className="flex flex-col gap-2">
+        {projects.map((project) => {
+          const isOpen = openProject === project.id;
+
+          return (
+            <div
+              key={project.id}
+              className="bg-white border border-neutral-200 rounded-xl overflow-hidden"
+            >
+              {/* PROJECT BUTTON */}
+              <button
+                onClick={() => setOpenProject(isOpen ? null : project.id)}
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-50 transition-all"
+              >
+                <span className="text-sm font-medium text-neutral-700 truncate">
+                  {project.projectname}
+                </span>
+
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform duration-300 ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* SUB MENUS */}
+              {isOpen && (
+                <div className="border-t border-neutral-100 px-2 py-2 flex flex-col gap-1">
+                  {subMenus.map((menu, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleNavigation(project.id, menu)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-neutral-600 hover:bg-black hover:text-white transition-all"
+                    >
+                      {menu.icon}
+
+                      <span>{menu.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 

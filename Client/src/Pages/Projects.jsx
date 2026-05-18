@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
 import { ChevronDown, SearchIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Projects = () => {
   const [open, setOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const [isSelected, setIsSelected] = useState("All Status");
   const [selected, setSelected] = useState("All Priority");
@@ -29,7 +31,7 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/projects", {
+      const res = await axios.get("http://localhost:5000/projects/projects", {
         withCredentials: true,
       });
 
@@ -84,11 +86,45 @@ const Projects = () => {
     }
   };
 
+  // DELETE PROJECT
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/projects/${id}`, {
+        withCredentials: true,
+      });
+
+      // REFRESH PROJECTS
+      fetchProjects();
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+  };
+
+  // UPDATE PROJECT STATUS
+  const handleStatusUpdate = async (projectId, newStatus) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/projects/${projectId}/status`,
+        {
+          status: newStatus,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      // REFRESH PROJECTS
+      fetchProjects();
+    } catch (error) {
+      console.error("Status update failed:", error);
+    }
+  };
+
   const Status = [
     { name: "All Status", id: 1 },
-    { name: "Active", id: 2 },
-    { name: "Planning", id: 3 },
-    { name: "Completed", id: 4 },
+    { name: "todo", id: 2 },
+    { name: "inprogress", id: 3 },
+    { name: "done", id: 4 },
   ];
 
   const Priority = [
@@ -217,32 +253,51 @@ const Projects = () => {
               filteredProjects.map((project) => (
                 <div
                   key={project.id}
+                  onClick={() => navigate(`/tasks/${project.id}`)}
                   className="w-80 p-4 cursor-pointer hover:bg-gray-100 border border-neutral-300 rounded-md transition"
                 >
                   <div className="flex justify-between items-center">
                     <h1 className="font-semibold text-lg capitalize">
                       {project.projectname}
                     </h1>
+
+                    <button
+                      onClick={() => handleDelete(project.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600 transition"
+                    >
+                      Delete
+                    </button>
                   </div>
 
                   <p className="text-neutral-600 mt-2">{project.projectdesc}</p>
 
                   <div className="flex justify-between text-sm text-neutral-600 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-md capitalize
-                        ${
-                          project.status === "active"
-                            ? "bg-green-300 text-green-950"
-                            : project.status === "planning"
-                              ? "bg-yellow-300 text-yellow-950"
-                              : project.status === "completed"
-                                ? "bg-blue-300 text-blue-950"
-                                : "bg-gray-300 text-gray-900"
-                        }
-                      `}
+                    <select
+                      value={project.status}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        e.stopPropagation();
+
+                        handleStatusUpdate(project.id, e.target.value);
+                      }}
+                      className={`px-2 py-1 rounded-md capitalize text-sm border-none outline-none
+    ${
+      project.status === "active"
+        ? "bg-green-300 text-green-950"
+        : project.status === "planning"
+          ? "bg-yellow-300 text-yellow-950"
+          : project.status === "completed"
+            ? "bg-blue-300 text-blue-950"
+            : "bg-gray-300 text-gray-900"
+    }
+  `}
                     >
-                      {project.status}
-                    </span>
+                      <option value="todo">Todo</option>
+
+                      <option value="inprogress">In Progress</option>
+
+                      <option value="done">Done</option>
+                    </select>
 
                     <span className="capitalize">
                       {project.priority} Priority
@@ -266,7 +321,7 @@ const Projects = () => {
           {/* MODAL */}
           {isModalOpen && (
             <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-              <div className="bg-white p-6 rounded-md w-[450px] relative">
+              <div className="bg-white p-6 rounded-md w-112.5 relative">
                 <button
                   className="absolute top-2 right-3 text-2xl"
                   onClick={() => {

@@ -1,41 +1,80 @@
-import React from 'react'
-import { UserIcon } from 'lucide-react'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const OverdueDisplay = () => {
+  const [tasks, setTasks] = useState([]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchOverdueTasks();
+  }, []);
+
+  const fetchOverdueTasks = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/tasks", {
+        withCredentials: true,
+      });
+
+      const overdue = res.data.tasks.filter(
+        (task) => new Date(task.duedate) < new Date() && task.status !== "done",
+      );
+
+      setTasks(overdue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <>
-    
-     <div className=" border lg:w-65 md:w-65 sm:w-60 m-3 flex flex-col items-center rounded-md border-neutral-300 shadow">
-        <div className="w-full  border-b border-neutral-300 px-4 py-3  pb-2">
-          <div>
-            <h2 className="flex items-center gap-3">
-              {" "}
-              <UserIcon size={16} />
-              My Task
-            </h2>
-          </div>
-        </div>
+    <div className="border rounded-md shadow p-4 m-3 bg-white">
+      {/* HEADER */}
+      <div className="flex items-center gap-2 mb-4">
+        <AlertTriangle className="text-red-500" />
 
-        <div className="w-full flex flex-col gap-4 p-3 text-sm">
-          <div className=" hover:bg-gray-100 rounded-md p-3">
-            <span className="font-medium">Set Up EKS Cluster</span>
-            <p className="font-light">TASK • HIGH priority</p>
-          </div>
-
-          <div className=" hover:bg-gray-100 rounded-md p-3">
-            <span className="font-medium">Migrate to Playwright 1.48</span>
-            <p className="font-light">IMPROVEMENT • HIGH priority</p>
-          </div>
-
-          <div className=" hover:bg-gray-100 rounded-md p-3">
-            <span className="font-medium">Visual Snapshot Comparison</span>
-            <p className="font-light">FEATURE • LOW priority</p>
-          </div>
-        </div>
+        <h2 className="font-bold text-lg">Overdue Tasks</h2>
       </div>
-    
-    </>
-  )
-}
 
-export default OverdueDisplay
+      {/* EMPTY */}
+      {tasks.length === 0 ? (
+        <p className="text-gray-500">No overdue tasks</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              onClick={() =>
+                navigate(`/tasks/${task.project_id}?task=${task.id}`)
+              }
+              className="border border-red-300 bg-red-50 rounded-md p-3 cursor-pointer hover:bg-red-100 transition"
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold capitalize">{task.taskname}</h3>
+
+                <span className="text-xs bg-red-200 text-red-700 px-2 py-1 rounded">
+                  Overdue
+                </span>
+              </div>
+
+              <p className="text-sm text-gray-600 mt-2">
+                Project: {task.projectname}
+              </p>
+
+              <p className="text-sm text-gray-600">
+                Due: {new Date(task.duedate).toLocaleDateString()}
+              </p>
+
+              <p className="text-sm text-red-600 mt-1 capitalize">
+                Status: {task.status}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default OverdueDisplay;
