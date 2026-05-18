@@ -8,22 +8,23 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex  h-screen overflow-hidden">
         
           <Sidebar
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
-        
-        <div className=" flex flex-col  w-full ">
           
-            <Navbar
+        <Navbar
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}
             />
+        
+          
+            
           
           <main className=" mt-16 flex-1 overflow-y-auto   ">{children}</main>
-        </div>
+        
       </div>
     </>
   );

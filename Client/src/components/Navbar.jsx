@@ -1,45 +1,34 @@
 import React from "react";
-import { SearchIcon, PanelLeft } from "lucide-react";
-import { MoonIcon, SunIcon } from "lucide-react";
+import { MenuIcon, UserIcon } from "lucide-react";
 
-
-const Navbar = () => {
-
+const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   return (
-    <>
-      <div className="fixed z-50 flex items-start w-full h-17 px-2 pb-2 border-b border-neutral-300 ">
-        <div className="flex w-full gap-4 items-center">
-          <button className="mt-3">
-            <PanelLeft size={20} />
-          </button>
+    <header className="fixed top-0 left-0 right-0 h-16 ml-72 bg-white border-b border-neutral-200 ">
+      <div className="h-full px-4 md:px-6 flex items-center justify-between">
+        <button
+          type="button"
+          aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+          onClick={() => setIsSidebarOpen((prev) => !prev)}
+          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-neutral-100 transition"
+        >
+          <MenuIcon size={20} />
+        </button>
 
-          <div className="relative flex justify-center items-center mt-3">
-            <SearchIcon size={20} className="absolute left-2.5 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search Projects,tasks here"
-              className="rounded-md border border-gray-300 text-gray-900 pl-8 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus-border-blue-500 transition"
-            />
+        <div className=" gap-3 w-full flex justify-center items-center">
+          <div className="hidden sm:flex flex-col leading-tight ">
+            <p className=" text-xl font-bold text-center text-neutral-900">
+              Project Management Application
+            </p>
           </div>
         </div>
 
-        <div className="flex justify-between gap-8 items-center px-5 mt-3 ">
-          <button className="border border-neutral-400 px-1 py-1 rounded-md">
-            {/* {
-                    theme === "light" ?
-                    (<MoonIcon/>) : (<SunIcon />)
-                } */}
-            <MoonIcon />
-          </button>
-
-          <img
-            src="profile_img_a.svg"
-            alt="User Avatar"
-            className="size-7 rounded-full mr-8"
-          />
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center">
+            <UserIcon size={18} className="text-neutral-600" />
+          </div>
         </div>
       </div>
-    </>
+    </header>
   );
 };
 
