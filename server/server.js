@@ -10,6 +10,8 @@ import projectRoutes from "./routes/projects.js";
 import taskRoutes from "./routes/tasks.js";
 import teamRoutes from "./routes/team.js";
 import insightsRoutes from "./routes/projectInsights.js";
+import workspaceRoutes from "./routes/workspaces.js";
+import settingRoute from "./routes/settings.js"
 
 dotenv.config();
 
@@ -37,6 +39,8 @@ app.use("/tasks", taskRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/projects", insightsRoutes);
 
+app.use("/workspaces", workspaceRoutes);
+app.use("/settings" , settingRoute);
 app.get("/", (req, res) => {
   res.send("API is running....");
 });

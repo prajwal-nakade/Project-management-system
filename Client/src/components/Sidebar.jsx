@@ -6,7 +6,7 @@ import {
   UserIcon,
   BriefcaseBusiness,
 } from "lucide-react";
-
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -17,7 +17,6 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState("Workspace 1");
 
   const dropdownRef = useRef();
 
@@ -44,16 +43,80 @@ const Sidebar = () => {
     },
   ];
 
-  const workSpaces = [
-    {
-      name: "Workspace 1",
-      members: 5,
-    },
-    {
-      name: "Workspace 2",
-      members: 3,
-    },
-  ];
+  const [workspaces, setWorkspaces] = useState([]);
+
+  const [selectedWorkspace, setSelectedWorkspace] = useState(
+    localStorage.getItem("workspace")
+      ? JSON.parse(localStorage.getItem("workspace"))
+      : null,
+  );
+
+  const [workspaceName, setWorkspaceName] = useState("");
+
+  useEffect(() => {
+    fetchWorkspaces();
+  }, []);
+
+  const fetchWorkspaces = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/workspaces", {
+        withCredentials: true,
+      });
+
+      setWorkspaces(res.data.workspaces);
+
+      // DEFAULT WORKSPACE
+      if (!selectedWorkspace && res.data.workspaces.length > 0) {
+        setSelectedWorkspace(res.data.workspaces[0]);
+
+        localStorage.setItem(
+          "workspace",
+          JSON.stringify(res.data.workspaces[0]),
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const createWorkspace = async () => {
+    try {
+      if (!workspaceName.trim()) return;
+
+      const res = await axios.post(
+        "http://localhost:5000/workspaces",
+        {
+          name: workspaceName,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      console.log(res.data);
+
+      // REFRESH LIST
+      fetchWorkspaces();
+
+      // RESET INPUT
+      setWorkspaceName("");
+
+      // CLOSE DROPDOWN
+      setIsOpen(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const selectWorkspace = (workspace) => {
+    setSelectedWorkspace(workspace);
+
+    localStorage.setItem("workspace", JSON.stringify(workspace));
+
+    setIsOpen(false);
+
+    window.location.reload();
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -70,7 +133,7 @@ const Sidebar = () => {
   }, []);
 
   return (
-    <aside className="hidden md:flex lg:flex flex-col w-72 h-screen bg-white border-r border-neutral-200 sticky top-0 overflow-hidden">
+    <aside className="hidden md:flex lg:flex flex-col  w-72 h-screen bg-white border-r border-neutral-200 sticky top-0 overflow-hidden">
       {/* HEADER */}
       <div className="h-16 border-b border-neutral-200 flex items-center px-5">
         <div className="flex items-center gap-3">
@@ -96,7 +159,9 @@ const Sidebar = () => {
           className="w-full flex items-center justify-between bg-neutral-100 hover:bg-neutral-200 transition-all rounded-xl px-4 py-3"
         >
           <div className="text-left">
-            <p className="text-sm font-medium">{selected}</p>
+            <p className="text-sm font-medium">
+              {selectedWorkspace?.name || "Select Workspace"}
+            </p>
 
             <p className="text-xs text-neutral-500">Active Workspace</p>
           </div>
@@ -109,35 +174,38 @@ const Sidebar = () => {
 
         {isOpen && (
           <div className="absolute top-24 left-4 right-4 bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden z-50">
-            {workSpaces.map((ws) => (
+            {workspaces.map((ws) => (
               <button
-                key={ws.name}
-                onClick={() => {
-                  setSelected(ws.name);
-                  setIsOpen(false);
-
-                  // REDIRECT WHEN WORKSPACE CLICKED
-                  navigate("/dashboard");
-                }}
+                key={ws.id}
+                onClick={() => selectWorkspace(ws)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-100 transition-all"
               >
                 <div className="text-left">
                   <p className="text-sm font-medium">{ws.name}</p>
-
-                  <p className="text-xs text-neutral-500">
-                    {ws.members} Members
-                  </p>
                 </div>
 
-                {selected === ws.name && (
+                {selectedWorkspace?.id === ws.id && (
                   <div className="w-2 h-2 rounded-full bg-green-500" />
                 )}
               </button>
             ))}
 
-            <button className="w-full border-t border-neutral-200 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-all">
-              + Add New Workspace
-            </button>
+            <div className="border-t border-neutral-200 p-3 flex gap-2">
+              <input
+                type="text"
+                placeholder="Workspace Name"
+                value={workspaceName}
+                onChange={(e) => setWorkspaceName(e.target.value)}
+                className="border rounded-md px-2 py-1 text-sm w-full"
+              />
+
+              <button
+                onClick={createWorkspace}
+                className="bg-blue-600 text-white px-3 rounded-md hover:bg-blue-700 transition"
+              >
+                Add
+              </button>
+            </div>
           </div>
         )}
       </div>
