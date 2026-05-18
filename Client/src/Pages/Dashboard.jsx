@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [overdueTasks, setOverdueTasks] = useState([]);
 
+  const selectedWorkspace = JSON.parse(localStorage.getItem("workspace"));
+
   const [newProject, setNewProject] = useState({
     projectname: "",
     projectdesc: "",
@@ -23,6 +25,7 @@ const Dashboard = () => {
     priority: "",
     startdate: "",
     enddate: "",
+    workspace_id: selectedWorkspace?.id,
   });
 
   // HANDLE INPUT
@@ -49,7 +52,10 @@ const Dashboard = () => {
 
         credentials: "include",
 
-        body: JSON.stringify(newProject),
+        body: JSON.stringify({
+          ...newProject,
+          workspace_id: selectedWorkspace?.id,
+        }),
       });
 
       const data = await response.json();
@@ -81,23 +87,31 @@ const Dashboard = () => {
   // FETCH PROJECTS
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/projects/projects", {
-        withCredentials: true,
-      });
+      const workspace = JSON.parse(localStorage.getItem("workspace"));
+
+      const res = await axios.get(
+        `http://localhost:5000/projects/projects?workspace_id=${workspace.id}`,
+        {
+          withCredentials: true,
+        },
+      );
 
       setProjects(res.data.projects);
     } catch (error) {
       console.error(error);
     }
   };
-
   // FETCH TASKS
   const fetchTasks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/tasks", {
-        withCredentials: true,
-      });
+      const workspace = JSON.parse(localStorage.getItem("workspace"));
 
+      const res = await axios.get(
+        `http://localhost:5000/tasks?workspace_id=${workspace.id}`,
+        {
+          withCredentials: true,
+        },
+      );
       setTasks(res.data.tasks);
 
       // OVERDUE FILTER
@@ -246,25 +260,88 @@ const Dashboard = () => {
 
         {/* MODAL */}
         {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-            <div className="bg-white p-6 rounded-md w-[450px] relative">
-              <button
-                className="absolute top-2 right-3 text-2xl"
-                onClick={() => setIsModalOpen(false)}
-              >
-                ×
-              </button>
+            <div className="fixed inset-0 flex items-center justify-center bg-black/70">
+              <div className="bg-white p-6 rounded-md w-100 relative">
+                <button
+                  className="absolute top-2 right-3 text-2xl"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                  }}
+                >
+                  X
+                </button>
 
-              <h1 className="text-2xl font-bold text-center mb-5">
-                Create New Project
-              </h1>
+                <h1 className="flex items-center justify-center text-2xl font-bold mb-3">Create New Project</h1>
+                <form action="" className="w-full flex flex-col justify-center mx-auto my-auto">
+                  <label htmlFor="">Project Name :</label>
+                  <input
+                    type="text"
+                    placeholder="Enter the Project name here"
+                    className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                  />
 
-              <form onSubmit={handleSubmit} className="flex flex-col">
-                {/* remaining form remains same */}
-              </form>
+                  <label htmlFor="">Description :</label>
+                  <textarea name="description" id="" className="border border-neutral-400 rounded-md px-3 py-1 m-1 ">
+                    Describe Your Project
+                  </textarea>
+
+                  <div className="w-ful flex gap-11 mb-4">
+                    <div className="  ">
+                      <label htmlFor="" className="flex items-center">Status :</label>
+                      <select
+                        name=""
+                        id=""
+                        value={status}
+                        onChange={(e) => {
+                          setStatus(e.target.value);
+                        }}
+                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                      >
+                        <option value="">select Status</option>
+                        <option value="todo">To Do</option>
+                        <option value="inprogress">In Progress</option>
+                        <option value="done">Done</option>
+                      </select>
+                    </div>
+
+                    <div className=" ">
+                      <label htmlFor="" className="flex items-center">Prioroty :</label>
+                      <select
+                        name=""
+                        id=""
+                        value={status}
+                        onChange={(e) => {
+                          setStatus(e.target.value);
+                        }}
+                        className="border border-neutral-400 rounded-md px-3 py-1 m-1"
+                      >
+                        <option value="">Priority</option>
+                        <option value="todo">High</option>
+                        <option value="inprogress">Medium</option>
+                        <option value="done">Low</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="w-ful flex justify-between">
+                    <div>
+                      <label htmlFor="">Start Date :</label>
+                      <input type="date" className="border border-neutral-400 rounded-md px-3 py-1 m-1"/>
+                    </div>
+
+                    <div>
+                      <label htmlFor="">End Date :</label>
+                      <input type="date" className="border border-neutral-400 rounded-md px-3 py-1 m-1"/>
+                    </div>
+                  </div>
+
+                  <div className="w-full">
+                    <button className="w-30 flex justify-center my-4 border mx-auto rounded-md bg-blue-700 text-white  hover:bg-blue-400 ">Save</button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
     </Layout>
   );

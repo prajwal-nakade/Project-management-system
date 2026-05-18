@@ -4,11 +4,20 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+//
 // CREATE PROJECT
+//
 router.post("/new-project", authMiddleware, async (req, res) => {
   try {
-    const { projectname, projectdesc, status, priority, startdate, enddate } =
-      req.body;
+    const {
+      projectname,
+      projectdesc,
+      status,
+      priority,
+      startdate,
+      enddate,
+      workspace_id,
+    } = req.body;
 
     const user_id = req.user.user_id;
 
@@ -21,9 +30,10 @@ router.post("/new-project", authMiddleware, async (req, res) => {
         priority,
         startdate,
         enddate,
-        user_id
+        user_id,
+        workspace_id
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING *;
     `;
 
@@ -35,6 +45,7 @@ router.post("/new-project", authMiddleware, async (req, res) => {
       startdate,
       enddate,
       user_id,
+      workspace_id,
     ];
 
     const result = await client.query(query, values);
@@ -53,18 +64,24 @@ router.post("/new-project", authMiddleware, async (req, res) => {
   }
 });
 
-// GET USER PROJECTS
+//
+// GET PROJECTS BY WORKSPACE
+//
 router.get("/projects", authMiddleware, async (req, res) => {
   try {
     const user_id = req.user.user_id;
 
+    const { workspace_id } = req.query;
+
     const result = await client.query(
       `
-      SELECT * FROM projects
+      SELECT *
+      FROM projects
       WHERE user_id = $1
+      AND workspace_id = $2
       ORDER BY id DESC
       `,
-      [user_id],
+      [user_id, workspace_id],
     );
 
     res.status(200).json({
@@ -81,7 +98,49 @@ router.get("/projects", authMiddleware, async (req, res) => {
   }
 });
 
+//
+// GET SINGLE PROJECT
+//
+router.get("/projects/:id", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user_id = req.user.user_id;
+
+    const result = await client.query(
+      `
+        SELECT *
+        FROM projects
+        WHERE id = $1
+        AND user_id = $2
+        `,
+      [id, user_id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      project: result.rows[0],
+    });
+  } catch (error) {
+    console.error(error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+});
+
+//
 // DELETE PROJECT
+//
 router.delete("/projects/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
@@ -90,10 +149,11 @@ router.delete("/projects/:id", authMiddleware, async (req, res) => {
 
     const result = await client.query(
       `
-      DELETE FROM projects
-      WHERE id = $1 AND user_id = $2
-      RETURNING *;
-      `,
+        DELETE FROM projects
+        WHERE id = $1
+        AND user_id = $2
+        RETURNING *
+        `,
       [id, user_id],
     );
 
@@ -118,7 +178,9 @@ router.delete("/projects/:id", authMiddleware, async (req, res) => {
   }
 });
 
+//
 // UPDATE PROJECT STATUS
+//
 router.put("/projects/:id/status", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
@@ -133,7 +195,7 @@ router.put("/projects/:id/status", authMiddleware, async (req, res) => {
         SET status = $1
         WHERE id = $2
         AND user_id = $3
-        RETURNING *;
+        RETURNING *
         `,
       [status, id, user_id],
     );
@@ -151,34 +213,6 @@ router.put("/projects/:id/status", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
-  }
-});
-
-router.get("/", authMiddleware, async (req, res) => {
-  try {
-    const user_id = req.user.user_id;
-
-    const result = await client.query(
-      `
-      SELECT *
-      FROM projects
-      WHERE user_id = $1
-      ORDER BY id DESC
-      `,
-      [user_id],
-    );
-
-    res.status(200).json({
-      success: true,
-      projects: result.rows,
-    });
-  } catch (error) {
-    console.log(error);
 
     res.status(500).json({
       success: false,
