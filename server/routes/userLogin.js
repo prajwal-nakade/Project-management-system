@@ -5,6 +5,13 @@ import jwt from "jsonwebtoken";
 export const userLogin = async (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required",
+    });
+  }
+
   try {
     const user = await client.query("SELECT * FROM users WHERE email=$1", [
       email,
@@ -23,19 +30,21 @@ export const userLogin = async (req, res) => {
 
     const token = jwt.sign({ userId: user.rows[0].id }, process.env.JWT_SECRET);
 
+    const isProd = process.env.NODE_ENV === "production";
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
+
     res.json({
-      success:true,
+      success: true,
       message: "Login Successful",
       user: {
-        id: user.id,
-        email: user.email,
-        password: user.password,
+        id: user.rows[0].id,
+        email: user.rows[0].email,
       },
     });
   } catch (error) {
