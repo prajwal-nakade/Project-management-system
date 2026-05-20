@@ -45,10 +45,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-100 via-white to-indigo-100 px-4">
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
         {/* LEFT SIDE */}
-        <div className="hidden lg:flex flex-col justify-center bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-12 relative overflow-hidden">
+        <div className="hidden lg:flex flex-col justify-center bg-linear-to-br from-blue-600 to-indigo-700 text-white p-12 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full -translate-x-20 -translate-y-20"></div>
 
           <div className="absolute bottom-0 right-0 w-72 h-72 bg-white/10 rounded-full translate-x-20 translate-y-20"></div>
@@ -151,14 +151,14 @@ const LoginPage = () => {
             {/* LOGIN BUTTON */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:scale-[1.01] hover:shadow-xl transition-all duration-300"
+              className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:scale-[1.01] hover:shadow-xl transition-all duration-300"
             >
               Login
             </button>
 
             {/* SIGNUP */}
             <p className="text-center text-gray-600">
-              Don&apos;t have an account?{" "}
+              Don't have an account?{" "}
               <button
                 type="button"
                 className="text-blue-600 hover:text-blue-800 font-semibold"
