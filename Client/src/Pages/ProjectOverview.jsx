@@ -7,9 +7,12 @@ const ProjectOverview = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/projects/projects", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        "https://project-management-system-vvva.vercel.app/projects/projects",
+        {
+          withCredentials: true,
+        },
+      );
 
       setProjects(res.data.projects);
     } catch (error) {

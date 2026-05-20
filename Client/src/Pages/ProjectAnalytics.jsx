@@ -31,7 +31,7 @@ const ProjectAnalytics = () => {
   const fetchAnalytics = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/projects/${projectId}/analytics`,
+        `https://project-management-system-vvva.vercel.app/projects/${projectId}/analytics`,
       );
 
       setAnalytics(res.data);

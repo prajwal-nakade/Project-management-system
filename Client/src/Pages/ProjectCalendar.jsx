@@ -22,7 +22,7 @@ const ProjectCalendar = () => {
   const fetchCalendarData = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/projects/${projectId}/calendar`,
+        `https://project-management-system-vvva.vercel.app/projects/${projectId}/calendar`,
       );
 
       const { project, tasks } = res.data;

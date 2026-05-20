@@ -36,9 +36,12 @@ const Settings = () => {
   // FETCH USER
   const fetchUser = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/auth/profile", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        "https://project-management-system-vvva.vercel.app/auth/profile",
+        {
+          withCredentials: true,
+        },
+      );
 
       setUser(res.data.user);
     } catch (error) {
@@ -62,7 +65,7 @@ const Settings = () => {
       setLoading(true);
 
       await axios.put(
-        "http://localhost:5000/auth/profile",
+        "https://project-management-system-vvva.vercel.app/auth/profile",
         {
           username: user.username,
           email: user.email,
@@ -99,7 +102,7 @@ const Settings = () => {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/auth/logout",
+        "https://project-management-system-vvva.vercel.app/auth/logout",
         {},
         {
           withCredentials: true,
