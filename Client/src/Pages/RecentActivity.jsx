@@ -18,7 +18,7 @@ const RecentActivity = () => {
   const fetchRecentActivity = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/tasks",
+        "https://project-management-system-vvva.vercel.app/tasks",
         {
           withCredentials: true,
         },
@@ -27,9 +27,7 @@ const RecentActivity = () => {
       const tasks = res.data.tasks;
 
       // SORT LATEST FIRST
-      const sortedTasks = [...tasks].sort(
-        (a, b) => b.id - a.id,
-      );
+      const sortedTasks = [...tasks].sort((a, b) => b.id - a.id);
 
       // CREATE ACTIVITY DATA
       const recent = sortedTasks.map((task) => {
@@ -49,10 +47,7 @@ const RecentActivity = () => {
         }
 
         // OVERDUE
-        if (
-          new Date(task.duedate) < new Date() &&
-          task.status !== "done"
-        ) {
+        if (new Date(task.duedate) < new Date() && task.status !== "done") {
           activityType = "overdue";
           activityMessage = "Task Overdue";
         }
@@ -130,16 +125,12 @@ const RecentActivity = () => {
     <div className="flex flex-col border rounded-md border-neutral-200 bg-white shadow-sm m-3">
       {/* HEADER */}
       <div className="w-full border-b border-neutral-200 px-4 py-3">
-        <h1 className="font-bold text-lg">
-          Recent Activity
-        </h1>
+        <h1 className="font-bold text-lg">Recent Activity</h1>
       </div>
 
       {/* EMPTY STATE */}
       {activities.length === 0 ? (
-        <div className="p-5 text-gray-500">
-          No recent activity found
-        </div>
+        <div className="p-5 text-gray-500">No recent activity found</div>
       ) : (
         <div className="flex flex-col">
           {activities.map((activity) => (
@@ -179,15 +170,10 @@ const RecentActivity = () => {
 
                   {/* FOOTER */}
                   <div className="flex justify-between mt-3 text-xs text-gray-500">
-                    <span>
-                      Project: {activity.project}
-                    </span>
+                    <span>Project: {activity.project}</span>
 
                     <span>
-                      Due:{" "}
-                      {new Date(
-                        activity.duedate,
-                      ).toLocaleDateString()}
+                      Due: {new Date(activity.duedate).toLocaleDateString()}
                     </span>
                   </div>
                 </div>

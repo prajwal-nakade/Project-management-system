@@ -46,9 +46,12 @@ const ProjectsSidebar = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get("http://localhost:5000/projects", {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        "https://project-management-system-vvva.vercel.app/projects",
+        {
+          withCredentials: true,
+        },
+      );
 
       setProjects(response.data.projects || []);
     } catch (error) {

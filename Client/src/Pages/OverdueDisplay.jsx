@@ -14,9 +14,12 @@ const OverdueDisplay = () => {
 
   const fetchOverdueTasks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/tasks", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        "https://project-management-system-vvva.vercel.app/tasks",
+        {
+          withCredentials: true,
+        },
+      );
 
       const overdue = res.data.tasks.filter(
         (task) => new Date(task.duedate) < new Date() && task.status !== "done",
