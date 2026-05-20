@@ -17,9 +17,12 @@ const MyTaskSidebar = () => {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/tasks", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        "https://project-management-system-vvva.vercel.app/tasks",
+        {
+          withCredentials: true,
+        },
+      );
       setTasks(res.data.tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);

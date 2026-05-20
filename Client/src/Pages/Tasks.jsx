@@ -39,7 +39,7 @@ const Tasks = () => {
   const fetchTasks = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/tasks/${projectId}`,
+        `https://project-management-system-vvva.vercel.app/tasks/${projectId}`,
         {
           withCredentials: true,
         },
@@ -66,9 +66,13 @@ const Tasks = () => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:5000/new-task", newTask, {
-        withCredentials: true,
-      });
+      await axios.post(
+        "https://project-management-system-vvva.vercel.app/new-task",
+        newTask,
+        {
+          withCredentials: true,
+        },
+      );
 
       // REFRESH TASKS
       fetchTasks();
@@ -93,9 +97,12 @@ const Tasks = () => {
   // DELETE TASK
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/tasks/${id}`, {
-        withCredentials: true,
-      });
+      await axios.delete(
+        `https://project-management-system-vvva.vercel.app/tasks/${id}`,
+        {
+          withCredentials: true,
+        },
+      );
 
       fetchTasks();
     } catch (error) {
@@ -107,7 +114,7 @@ const Tasks = () => {
   const updateTaskStatus = async (taskId, status) => {
     try {
       await axios.put(
-        `http://localhost:5000/tasks/${taskId}`,
+        `https://project-management-system-vvva.vercel.app/tasks/${taskId}`,
         {
           status,
         },
