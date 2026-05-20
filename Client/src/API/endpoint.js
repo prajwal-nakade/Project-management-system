@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "project-management-system-vvva.vercel.app",
+  baseURL: "https://project-management-system-vvva.vercel.app/",
   withCredentials: true,
 });
 
