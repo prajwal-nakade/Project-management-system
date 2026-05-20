@@ -17,7 +17,7 @@ dotenv.config();
 
 const app = express();
 
-const allowed = ["http://localhost:5173"];
+const allowed = ["http://localhost:5173", "https://project-management-system-n9sh.vercel.app"];
 
 app.use(
   cors({
